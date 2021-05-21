@@ -49,4 +49,4 @@ class Handler(object):
         self._notifier.send(exception)
 
 
-__all__ = ["Handler"]
+__all__ = ["Handler", "BaseNotifier"]

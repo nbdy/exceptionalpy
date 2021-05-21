@@ -1,15 +1,15 @@
 # exceptionalpy
 ## features
-- [X] Handler
+- Handler
   - [X] handle exceptions
     - [X] print stacktrace
     - [X] forward stacktrace to notifier
 
-- [X] BaseNotifier
+- BaseNotifier
   - [X] provide interface for extensions
   
-- [ ] HTTPNotifier
-  - [ ] send stacktrace via POST to specified url
+- HTTPNotifier
+  - [X] send stacktrace via POST to specified url
   
-- [ ] MailNotifier
-  - [ ] send stacktrave via Mail to specified email addresses
+- SMTPNotifier
+  - [X] send stacktrace via Mail to specified email addresses
