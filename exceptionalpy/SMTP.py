@@ -1,33 +1,49 @@
-from smtplib import SMTP_SSL as SMTP
+from smtplib import SMTP_SSL
+from smtplib import SMTP
 from email.mime.text import MIMEText
 
 from exceptionalpy import BaseNotifier, Handler
 
 
 class SMTPNotifier(BaseNotifier):
-    def __init__(self, host: str, port: int, sender: str, username: str, password: str, destinations: list[str],
+    _cls = SMTP
+
+    def __init__(self, address: tuple, sender: str, credentials: tuple, destinations: list[str],
                  subject: str):
         BaseNotifier.__init__(self)
+        self.address = address
         self.sender = sender
-        self.username = username
-        self.password = password
+        self.credentials = credentials
         self.destinations = destinations
         self.subject = subject
-
-        self._client = SMTP(host, port)
-        self._client.login(self.username, self.password)
 
     def send(self, message: list[str]):
         msg = '\n'.join(message)
         msg = MIMEText(msg, "plain")
         msg["Subject"] = self.subject
         msg["From"] = self.sender
-        self._client.sendmail(self.sender, self.destinations, msg.as_string())
+
+        print("Connecting to server")
+        with self._cls(self.address[0], self.address[1]) as c:
+            if self.credentials:
+                c.login(self.credentials[0], self.credentials[1])
+            print("Sending email")
+            c.sendmail(self.sender, self.destinations, msg.as_string())
+            c.quit()
+
+
+class SMTPSNotifier(SMTPNotifier):
+    _cls = SMTP_SSL
 
 
 class SMTPHandler(Handler):
-    def __init__(self, address: tuple, credentials: tuple, sender: str, destinations: list[str], subject: str,
-                 init: bool = True):
+    _cls = SMTPNotifier
+
+    def __init__(self, address: tuple, sender: str, destinations: list[str], subject: str,
+                 init: bool = True, credentials: tuple = None):
         Handler.__init__(self, init)
-        self._notifier = SMTPNotifier(address[0], address[1], sender, credentials[0], credentials[1], destinations,
-                                      subject)
+        self._notifier = self._cls(address, sender, credentials, destinations, subject)
+
+
+class SMTPSHandler(SMTPHandler):
+    _cls = SMTPSNotifier

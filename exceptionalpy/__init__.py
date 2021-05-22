@@ -32,21 +32,27 @@ class BaseNotifier(object):
 class Handler(object):
     _notifier: BaseNotifier = None
 
-    def __init__(self, init=True):
+    def __init__(self, init: bool = True):
         if init:
             self._init()
 
-    def _init(self):
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self._deinit()
+
+    def _init(self) -> None:
         sys.excepthook = self.handle_exception
 
-    def _deinit(self):
+    @staticmethod
+    def _deinit() -> None:
         sys.excepthook = sys.__excepthook__
 
-    def handle_exception(self, etype, value, traceback):
+    def handle_exception(self, etype, value, traceback) -> None:
         exception = tb.format_exception(etype, value, traceback)
         for line in exception:
             print(line)
-        self._notifier.send(exception)
+
+        if self._notifier is not None:
+            self._notifier.send(exception)
 
 
 __all__ = ["Handler", "BaseNotifier"]
