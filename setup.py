@@ -26,7 +26,7 @@ setup(
     long_description=open("README.md", "r").read(),
     name="exceptionalpy",
     version="0.1",
-    description="global exception handler with notification and rescue features",
+    description="global exception handler with notification features",
     author="Pascal Eberlein",
     author_email="pascal@eberlein.io",
     url="https://github.com/nbdy/exceptionalpy",

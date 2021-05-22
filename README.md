@@ -13,3 +13,7 @@
   
 - SMTPNotifier
   - [X] send stacktrace via Mail to specified email addresses
+
+- Rescuer
+  - [ ] Manager like interface for threads / processes
+  - [ ] Capture exceptions, 
