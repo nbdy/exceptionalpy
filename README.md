@@ -1,4 +1,11 @@
 # exceptionalpy
+## install
+```shell
+pip3 install exceptionalpy
+# or, assuming you have git installed
+pip3 install git+https://github.com/nbdy/exceptionalpy
+```
+
 ## features
 - [X] exception handling decorator (ex / catch)
 - [X] timing decorator (ti / timeit)
