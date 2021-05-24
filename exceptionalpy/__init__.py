@@ -19,40 +19,105 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
-
+import pprint
 import sys
 import traceback as tb
 
 
 class BaseNotifier(object):
-    def send(self, message: list[str]):
+    def send(self, data: dict):
         pass
 
 
 class Handler(object):
-    _notifier: BaseNotifier = None
+    _orig_unraisablehook = None
+    notifier: BaseNotifier = None
 
-    def __init__(self, init: bool = True):
+    def __init__(self, init: bool = True, verbose: bool = False):
+        self.verbose = verbose
         if init:
-            self._init()
+            self.init()
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self._deinit()
+        self.deinit()
 
-    def _init(self) -> None:
-        sys.excepthook = self.handle_exception
+    def init(self) -> None:
+        if self.verbose:
+            print("Replacing exception hooks")
+        sys.excepthook = self.custom_excepthook
+        self._orig_unraisablehook = sys.unraisablehook
+        sys.unraisablehook = self.custom_unraisablehook
 
-    @staticmethod
-    def _deinit() -> None:
+    def deinit(self) -> None:
+        if self.verbose:
+            print("Setting original exception hooks")
         sys.excepthook = sys.__excepthook__
+        sys.unraisablehook = self._orig_unraisablehook
 
-    def handle_exception(self, etype, value, traceback) -> None:
-        exception = tb.format_exception(etype, value, traceback)
-        for line in exception:
+    def traceback2json(self, traceback) -> dict:
+        r = {
+            "frames": []
+        }
+        e = tb.extract_tb(traceback)
+        for f in e:
+            r["frames"].append({
+                "filename": f.filename,
+                "line_number": f.lineno,
+                "name": f.name,
+                "line": f.line
+            })
+
+        if self.verbose:
+            pprint.pprint(r)
+
+        return r
+
+    def show_exception(self, etype, value, traceback):
+        if not self.verbose:
+            return
+
+        print(10 * "-" + " EXCEPTION " + 10 * "-")
+        print(etype, value)
+        for line in tb.format_exception(etype, value, traceback):
             print(line)
+        self.traceback2json(traceback)  # todo remove
+        print(31 * "-")
+        print()
 
-        if self._notifier is not None:
-            self._notifier.send(exception)
+    def custom_excepthook(self, etype, value, traceback) -> None:
+        self.show_exception(etype, value, traceback)
+
+        if self.notifier is not None:
+            self.notifier.send(self.traceback2json(traceback))
+
+    def custom_unraisablehook(self, etype, value, traceback, msg, obj):
+        self.show_exception(etype, value, traceback)
+
+    def handle_exception(self, exception, fn, *args, **kwargs) -> None:
+        etype, ex, tb = sys.exc_info()
+        self.show_exception(etype, ex, tb)
 
 
-__all__ = ["Handler", "BaseNotifier"]
+class Rescuer(Handler):
+    classes: list = None
+
+    def __init__(self, init: bool = True, verbose: bool = False):
+        Handler.__init__(self, init, verbose)
+
+
+exceptionalpy_handler: Handler = Handler(False, False)
+
+
+def ex():
+    def decorator(fn):
+        def wrapper(*args, **kwargs):
+            try:
+                return fn(*args, **kwargs)
+            except Exception as e:
+                exceptionalpy_handler.handle_exception(e, fn, *args, **kwargs)
+                pass
+        return wrapper
+    return decorator
+
+
+__all__ = ["Handler", "BaseNotifier", "ex", "exceptionalpy_handler"]

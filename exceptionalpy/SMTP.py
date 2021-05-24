@@ -17,8 +17,8 @@ class SMTPNotifier(BaseNotifier):
         self.destinations = destinations
         self.subject = subject
 
-    def send(self, message: list[str]):
-        msg = '\n'.join(message)
+    def send(self, data: dict):
+        msg = '\n'.join(data)  # todo: fix
         msg = MIMEText(msg, "plain")
         msg["Subject"] = self.subject
         msg["From"] = self.sender

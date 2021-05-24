@@ -15,12 +15,11 @@ class HTTPNotifier(BaseNotifier):
         self.auth = auth
         self.verify_ssl = verify_ssl
 
-    def send(self, message: list[str]):
+    def send(self, data: dict):
         if requests is None:
             return False
 
-        requests.request(self.method, self.url, json={"exception": '\n'.join(message)}, auth=self.auth,
-                         verify=self.verify_ssl)
+        requests.request(self.method, self.url, json=data, auth=self.auth, verify=self.verify_ssl)
 
 
 class HTTPHandler(Handler):
