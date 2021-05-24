@@ -31,6 +31,10 @@ pip3 install git+https://github.com/nbdy/exceptionalpy
 ### Rescuer
   - [ ] Manager like interface for threads / processes
   - [ ] Capture exceptions
+  - [ ] Interface which accepts replacements
+    - [ ] Socket
+    - [ ] Webserver
+  - [ ] Replace functions / classes
   
 ## usage
 ### basic
