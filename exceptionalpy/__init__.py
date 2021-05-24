@@ -22,6 +22,7 @@
 import pprint
 import sys
 import traceback as tb
+import time
 
 
 class BaseNotifier(object):
@@ -84,6 +85,12 @@ class Handler(object):
         print(31 * "-")
         print()
 
+    def show_timeit(self, fn, begin, end):
+        ns = end - begin
+        ms = ns / 1000000
+        s = ms / 1000
+        print(fn.__name__, "completed in", ns, "ns |", ms, "ms |", s, "s")
+
     def custom_excepthook(self, etype, value, traceback) -> None:
         self.show_exception(etype, value, traceback)
 
@@ -97,6 +104,53 @@ class Handler(object):
         etype, ex, tb = sys.exc_info()
         self.show_exception(etype, ex, tb)
 
+    def handle_timeit(self, fn, begin, end, *args, **kwargs):
+        self.show_timeit(fn, begin, end)
+
+
+exceptionalpy_handler: Handler = Handler(False, False)
+
+
+def timeit(fn, *args, **kwargs):
+    b = time.time_ns()
+    r = fn(*args, **kwargs)
+    e = time.time_ns()
+    exceptionalpy_handler.handle_timeit(fn, b, e, *args, **kwargs)
+    return r
+
+
+def catch(fn, *args, **kwargs):
+    try:
+        return fn(*args, **kwargs)
+    except Exception as e:
+        exceptionalpy_handler.handle_exception(e, fn, *args, **kwargs)
+        pass
+
+
+def ex():
+    def decorator(fn):
+        def wrapper(*args, **kwargs):
+            return catch(fn, *args, **kwargs)
+        return wrapper
+    return decorator
+
+
+def ti():
+    def decorator(fn):
+        def wrapper(*args, **kwargs):
+            return timeit(fn, *args, *kwargs)
+        return wrapper
+    return decorator
+
+
+def exti():
+    def decorator(fn):
+        @ex()
+        def wrapper(*args, **kwargs):
+            return timeit(fn, *args, **kwargs)
+        return wrapper
+    return decorator
+
 
 class Rescuer(Handler):
     classes: list = None
@@ -105,19 +159,6 @@ class Rescuer(Handler):
         Handler.__init__(self, init, verbose)
 
 
-exceptionalpy_handler: Handler = Handler(False, False)
-
-
-def ex():
-    def decorator(fn):
-        def wrapper(*args, **kwargs):
-            try:
-                return fn(*args, **kwargs)
-            except Exception as e:
-                exceptionalpy_handler.handle_exception(e, fn, *args, **kwargs)
-                pass
-        return wrapper
-    return decorator
-
-
-__all__ = ["Handler", "BaseNotifier", "ex", "exceptionalpy_handler"]
+__all__ = ["Handler", "BaseNotifier",
+           "exceptionalpy_handler",
+           "ex", "ti", "exti"]

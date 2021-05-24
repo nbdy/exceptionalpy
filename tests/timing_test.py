@@ -1,6 +1,6 @@
 #  MIT License
 #
-#  Copyright (c) 2021 Pascal Eberlein
+#  Copyright (c) 2021. Pascal Eberlein
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -19,22 +19,29 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+import time
 
-from setuptools import setup, find_packages
+from exceptionalpy import exceptionalpy_handler as handler, ti, exti
 
-setup(
-    long_description=open("README.md", "r").read(),
-    name="exceptionalpy",
-    version="0.3",
-    description="global exception handler with notification and timing features",
-    author="Pascal Eberlein",
-    author_email="pascal@eberlein.io",
-    url="https://github.com/nbdy/exceptionalpy",
-    classifiers=[
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
-        'License :: OSI Approved :: MIT License'
-    ],
-    packages=find_packages(),
-    long_description_content_type="text/markdown"
-)
+
+@ti()
+def function_that_takes_a_while():
+    time.sleep(0.4)
+    print("This took a while")
+
+
+@exti()
+def i_take_long_and_throw():
+    time.sleep(0.6)
+    print("This also took a while")
+    raise ArithmeticError
+
+
+if __name__ == '__main__':
+    handler.verbose = True
+    handler.init()
+    function_that_takes_a_while()
+    handler.deinit()
+
+    i_take_long_and_throw()
+    print("Done")
