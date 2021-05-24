@@ -11,23 +11,24 @@ pip3 install git+https://github.com/nbdy/exceptionalpy
 - [X] timing decorator (ti / timeit)
 - [X] exception handling and timing decorator (exti / catch_timeit)
 
-- Handler
+### Handler
   - [X] handle exceptions
     - [X] print stacktrace
     - [X] forward stacktrace to notifier
   - [X] handle timing results of functions
     - [ ] forward to notifier
 
-- BaseNotifier
+### Notifier
+#### BaseNotifier
   - [X] provide interface for extensions
   
-- HTTPNotifier
+#### HTTPNotifier
   - [X] send stacktrace via POST to specified url
   
-- SMTPNotifier
+#### SMTPNotifier
   - [X] send stacktrace via Mail to specified email addresses
 
-- Rescuer
+### Rescuer
   - [ ] Manager like interface for threads / processes
   - [ ] Capture exceptions
   
