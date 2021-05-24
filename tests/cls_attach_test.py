@@ -1,6 +1,6 @@
 #  MIT License
 #
-#  Copyright (c) 2021 Pascal Eberlein
+#  Copyright (c) 2021. Pascal Eberlein
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -20,21 +20,20 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-from setuptools import setup, find_packages
+from exceptionalpy import exceptionalpy_handler as handler, ex
 
-setup(
-    long_description=open("README.md", "r").read(),
-    name="exceptionalpy",
-    version="0.4",
-    description="global exception handler with notification and timing features",
-    author="Pascal Eberlein",
-    author_email="pascal@eberlein.io",
-    url="https://github.com/nbdy/exceptionalpy",
-    classifiers=[
-        'Intended Audience :: Developers',
-        'Topic :: Software Development :: Build Tools',
-        'License :: OSI Approved :: MIT License'
-    ],
-    packages=find_packages(),
-    long_description_content_type="text/markdown"
-)
+
+@handler.attach()
+class Attachable(object):
+    @ex()
+    def man(self):
+        raise ArithmeticError
+
+
+if __name__ == '__main__':
+    handler.verbose = True
+    handler.init()
+    print(handler.classes)
+    attachable = Attachable()
+    attachable.man()
+    print("end")

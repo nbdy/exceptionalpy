@@ -1,8 +1,8 @@
 # exceptionalpy
 ## features
-- [X] exception handling decorator (ex)
-- [X] timing decorator (ti)
-- [X] exception handling and timing decorator (exti)
+- [X] exception handling decorator (ex / catch)
+- [X] timing decorator (ti / timeit)
+- [X] exception handling and timing decorator (exti / catch_timeit)
 
 - Handler
   - [X] handle exceptions
@@ -25,7 +25,34 @@
   - [ ] Capture exceptions
   
 ## usage
+### basic
 
+```python
+import time
+from exceptionalpy import catch, timeit, exceptionalpy_handler as handler
+
+handler.verbose = True  # since you probably want to see your timing results
+
+
+@timeit()
+def gotta_work_fast():
+  time.sleep(0.4)
+  
+  
+@catch()
+def cant_fail():
+  raise ArithmeticError
+
+
+gotta_work_fast()  
+# gotta_work_fast completed in 400432710 ns | 400.43271 ms | 0.40043270999999997 s
+cant_fail()
+# prints stacktrace
+print("I will still be printed.")
+print("Since the program will not exit even though an exception occurred.")
+```
+
+### extensive guide
 ```python
 import time
 from exceptionalpy import ex, exceptionalpy_handler as handler
