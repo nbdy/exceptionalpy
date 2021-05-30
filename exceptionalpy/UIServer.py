@@ -1,6 +1,6 @@
 #  MIT License
 #
-#  Copyright (c) 2021 Pascal Eberlein
+#  Copyright (c) 2021. Pascal Eberlein
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -20,14 +20,19 @@
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
 
-from exceptionalpy import Handler
+from flask import render_template
+from exceptionalpy.APIServer import APIServer
 
 
-def main():
-    Handler(verbose=True)
-    x = {}
-    print(x[2])
+class UIServer(APIServer):
+    # --- Overrides ---
+    def _register_routes(self):
+        APIServer._register_routes(self)
 
+    # --- Internal ----
+    def _register_ui_routes(self):
+        self.app.add_url_rule("/", "index", )
 
-if __name__ == '__main__':
-    main()
+    # --- UI ---
+    def index(self):
+        return render_template("index.html", **self.data.__dict__)

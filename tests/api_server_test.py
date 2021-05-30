@@ -1,6 +1,6 @@
 #  MIT License
 #
-#  Copyright (c) 2021 Pascal Eberlein
+#  Copyright (c) 2021. Pascal Eberlein
 #
 #  Permission is hereby granted, free of charge, to any person obtaining a copy
 #  of this software and associated documentation files (the "Software"), to deal
@@ -19,15 +19,46 @@
 #  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 #  OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 #  SOFTWARE.
+import random
+import time
 
-from exceptionalpy import Handler
+from exceptionalpy import ti, ex, exceptionalpy_handler
+from exceptionalpy.APIServer import APIServer
+from procpy import Process
 
 
-def main():
-    Handler(verbose=True)
-    x = {}
-    print(x[2])
+class TestApplication(Process):
+    do_run: bool = True
+
+    @ti()
+    def timed_function(self):
+        print("i get timed")
+        time.sleep(random.randint(0, 4))
+
+    @ex()
+    def caught_function(self):
+        print("i get caught")
+        raise ArithmeticError("Oh no")
+
+    def run(self) -> None:
+        while self.do_run:
+            self.caught_function()
+            self.timed_function()
+            time.sleep(2)
 
 
 if __name__ == '__main__':
-    main()
+    exceptionalpy_handler = APIServer(debug=True)
+    ta = TestApplication()
+
+    try:
+        print("starting testapplication")
+        ta.start()
+        print("starting api")
+        exceptionalpy_handler.run()
+        print("joining testapplication")
+        ta.join()
+    except KeyboardInterrupt:
+        print("terminating")
+        ta.terminate()
+    print("done")

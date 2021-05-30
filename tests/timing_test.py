@@ -21,16 +21,18 @@
 #  SOFTWARE.
 import time
 
-from exceptionalpy import exceptionalpy_handler as handler, ti, exti
+from exceptionalpy import Handler
+
+h = Handler(verbose=True)
 
 
-@ti()
+@h.timeit()
 def function_that_takes_a_while():
     time.sleep(0.4)
     print("This took a while")
 
 
-@exti()
+@h.catch()
 def i_take_long_and_throw():
     time.sleep(0.6)
     print("This also took a while")
@@ -38,10 +40,7 @@ def i_take_long_and_throw():
 
 
 if __name__ == '__main__':
-    handler.verbose = True
-    handler.init()
     function_that_takes_a_while()
-    handler.deinit()
-
     i_take_long_and_throw()
-    print("Done")
+    raise ArithmeticError
+    print("This will not be printed")

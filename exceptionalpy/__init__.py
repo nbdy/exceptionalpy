@@ -43,10 +43,10 @@ class Handler(object):
 
     def __init__(self, init: bool = True, verbose: bool = False):
         """
-
         :param init: override exception hooks right now
         :param verbose: print information about timing and exceptions to cli
         """
+        print(init, verbose)
         self.verbose = verbose
         if init:
             self.init()
@@ -205,6 +205,89 @@ class Handler(object):
         """
         self.show_timeit(fn, begin, end)
 
+    def _timeit(self, fn: callable, *args, **kwargs) -> int:
+        """
+        measures the time it takes in nanoseconds until a function completes running
+        :param fn: callable, the function to measure
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        b = time.time_ns()
+        r = fn(*args, **kwargs)
+        e = time.time_ns()
+        self.handle_timeit(fn, b, e, *args, **kwargs)
+        return r
+
+    def _catch(self, fn: callable, *args, **kwargs):
+        """
+        try to execute a function and return the functions return value
+        or, if there is an exception, call
+            handle_exception
+        on the current instance of
+            exceptional_handler
+
+        :param fn:
+        :param args:
+        :param kwargs:
+        :return:
+        """
+        try:
+            return fn(*args, **kwargs)
+        except Exception as e:
+            self.handle_exception(e, fn, *args, **kwargs)
+            pass
+
+    def catch(self):
+        """
+        decorator
+        catches an exception if one occurs
+        and forwards it to the global exception handler
+        :return:
+        """
+
+        def decorator(fn):
+            def wrapper(*args, **kwargs):
+                return self._catch(fn, *args, **kwargs)
+
+            return wrapper
+
+        return decorator
+
+    def timeit(self):
+        """
+        decorator
+        measures how long a function takes to execute
+        and forwards it to the global exception handler
+        :return:
+        """
+
+        def decorator(fn):
+            def wrapper(*args, **kwargs):
+                return self._timeit(fn, *args, *kwargs)
+
+            return wrapper
+
+        return decorator
+
+    def catch_timeit(self):
+        """
+        decorator
+        catches an exception if one occurs
+        measures how long a function takes to execute
+        and forwards that information to the global exception handler
+        :return:
+        """
+
+        def decorator(fn):
+            @ex()
+            def wrapper(*args, **kwargs):
+                return self._timeit(fn, *args, **kwargs)
+
+            return wrapper
+
+        return decorator
+
 
 class Replacer(Handler):
     classes = {}
@@ -213,110 +296,8 @@ class Replacer(Handler):
         def wrapper(cls):
             self.classes[cls.__name__] = cls
             return cls
+
         return wrapper
 
 
-exceptionalpy_handler: Handler = Handler(False, False)
-
-
-def _timeit(fn: callable, *args, **kwargs) -> int:
-    """
-    measures the time it takes in nanoseconds until a function completes running
-    :param fn: callable, the function to measure
-    :param args:
-    :param kwargs:
-    :return:
-    """
-    b = time.time_ns()
-    r = fn(*args, **kwargs)
-    e = time.time_ns()
-    exceptionalpy_handler.handle_timeit(fn, b, e, *args, **kwargs)
-    return r
-
-
-def _catch(fn: callable, *args, **kwargs):
-    """
-    try to execute a function and return the functions return value
-    or, if there is an exception, call
-        handle_exception
-    on the current instance of
-        exceptional_handler
-
-    :param fn:
-    :param args:
-    :param kwargs:
-    :return:
-    """
-    try:
-        return fn(*args, **kwargs)
-    except Exception as e:
-        exceptionalpy_handler.handle_exception(e, fn, *args, **kwargs)
-        pass
-
-
-def catch():
-    """
-    decorator
-    catches an exception if one occurs
-    and forwards it to the global exception handler
-    :return:
-    """
-    def decorator(fn):
-        def wrapper(*args, **kwargs):
-            return _catch(fn, *args, **kwargs)
-        return wrapper
-    return decorator
-
-
-def timeit():
-    """
-    decorator
-    measures how long a function takes to execute
-    and forwards it to the global exception handler
-    :return:
-    """
-    def decorator(fn):
-        def wrapper(*args, **kwargs):
-            return _timeit(fn, *args, *kwargs)
-        return wrapper
-    return decorator
-
-
-def catch_timeit():
-    """
-    decorator
-    catches an exception if one occurs
-    measures how long a function takes to execute
-    and forwards that information to the global exception handler
-    :return:
-    """
-    def decorator(fn):
-        @ex()
-        def wrapper(*args, **kwargs):
-            return _timeit(fn, *args, **kwargs)
-        return wrapper
-    return decorator
-
-
-ex = catch
-ti = timeit
-exti = catch_timeit
-
-
-def initialize(cls, *args, **kwargs):
-    """
-    initialize global exceptionalpy_handler instance with given cls, args and kwargs
-    :param cls:
-    :param args:
-    :param kwargs:
-    :return:
-    """
-    global exceptionalpy_handler
-    exceptionalpy_handler = cls(*args, **kwargs)
-
-
-__all__ = ["Handler", "BaseNotifier",
-           "exceptionalpy_handler",
-           "catch", "timeit", "catch_timeit",
-           "ex", "ti", "exti",
-           "initialize"]
+__all__ = ["Handler", "BaseNotifier"]

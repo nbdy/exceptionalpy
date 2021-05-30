@@ -18,7 +18,7 @@ def main():
 
 if __name__ == '__main__':
     print("Instantiated handler")
-    h = HTTPGetHandler("http://127.0.0.1:51341/notify")
+    h = HTTPGetHandler("http://127.0.0.1:51341/notify", verbose=True)
     print("Starting http server")
     p = Process(target=main)
     p.start()

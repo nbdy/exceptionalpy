@@ -40,8 +40,8 @@ class SMTPHandler(Handler):
     _cls = SMTPNotifier
 
     def __init__(self, address: tuple, sender: str, destinations: list[str], subject: str,
-                 init: bool = True, credentials: tuple = None):
-        Handler.__init__(self, init)
+                 init: bool = True, credentials: tuple = None, debug: bool = False):
+        Handler.__init__(self, init, debug)
         self._notifier = self._cls(address, sender, credentials, destinations, subject)
 
 
