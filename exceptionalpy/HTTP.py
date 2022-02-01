@@ -23,16 +23,16 @@ class HTTPNotifier(BaseNotifier):
 
 
 class HTTPHandler(Handler):
-    def __init__(self, url: str, method: str, auth: tuple = None, verify_ssl: bool = True, init: bool = True):
-        Handler.__init__(self, init)
+    def __init__(self, url: str, method: str, auth: tuple = None, verify_ssl: bool = True, init: bool = True, verbose: bool = False):
+        Handler.__init__(self, init, verbose)
         self._notifier = HTTPNotifier(url, method, auth, verify_ssl)
 
 
 class HTTPGetHandler(HTTPHandler):
-    def __init__(self, url: str, auth: tuple = None, verify_ssl: bool = True, init: bool = True):
-        HTTPHandler.__init__(self, url, 'GET', auth, verify_ssl, init)
+    def __init__(self, url: str, auth: tuple = None, verify_ssl: bool = True, init: bool = True, verbose: bool = False):
+        HTTPHandler.__init__(self, url, 'GET', auth, verify_ssl, init, verbose)
 
 
 class HTTPPostHandler(HTTPHandler):
-    def __init__(self, url: str, auth: tuple = None, verify_ssl: bool = True, init: bool = True):
-        HTTPHandler.__init__(self, url, 'POST', auth, verify_ssl, init)
+    def __init__(self, url: str, auth: tuple = None, verify_ssl: bool = True, init: bool = True, verbose: bool = False):
+        HTTPHandler.__init__(self, url, 'POST', auth, verify_ssl, init, verbose)

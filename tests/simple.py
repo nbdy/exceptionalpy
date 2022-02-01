@@ -23,11 +23,7 @@
 from exceptionalpy import Handler
 
 
-def main():
-    Handler()
+if __name__ == '__main__':
+    Handler(verbose=True)
     x = {}
     print(x[2])
-
-
-if __name__ == '__main__':
-    main()

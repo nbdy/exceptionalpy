@@ -206,6 +206,27 @@ class Handler(object):
         self.show_timeit(fn, begin, end)
 
 
+class ManagedObject(object):
+    __registered_functions: dict = {}
+
+    def __init__(self, **kwargs):
+        self.__dict__.update(kwargs)
+        self.__index_functions()
+
+    def __index_functions(self):
+        for fn in self.__dict__.values():
+            if isinstance(fn, callable.__class__):
+                self.__registered_functions[fn.__name__] = fn
+
+    def set_function(self, fn: callable) -> bool:
+        n = fn.__name__
+        if n in self.__registered_functions.keys():
+            self.__registered_functions[n] = fn
+            self.__dict__[n] = fn
+            return True
+        return False
+
+
 class Replacer(Handler):
     classes = {}
 
